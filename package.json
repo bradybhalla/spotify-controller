@@ -1,0 +1,22 @@
+{
+  "name": "spotify-controller",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install && cd client && npm install",
+
+    "client-dev": "cd client; npm run dev",
+    "client-build": "cd client; npm run build",
+    "client-preview": "cd client; npm run preview",
+
+    "dev": "source scripts/build.sh && node dist/index.js && source scripts/clean.sh",
+    "build": "source scripts/build.sh",
+    "clean": "source scripts/clean.sh"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.9.5"
+  }
+}

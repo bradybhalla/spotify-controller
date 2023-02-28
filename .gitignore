@@ -1,10 +1,8 @@
-client/node_modules
-server/node_modules
+node_modules
+dist
 server/*.js
 
-
-
-### From Vite vvv
+## Vite vv
 
 # Logs
 client/logs
