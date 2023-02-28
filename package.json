@@ -10,7 +10,7 @@
     "client-build": "cd client; npm run build",
     "client-preview": "cd client; npm run preview",
 
-    "dev": "source scripts/build.sh && node dist/index.js && source scripts/clean.sh",
+    "dev": "source scripts/build.sh && node dist/index.js; source scripts/clean.sh",
     "build": "source scripts/build.sh",
     "clean": "source scripts/clean.sh"
   },
