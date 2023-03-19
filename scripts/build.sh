@@ -1,5 +1,7 @@
+npm run clean
+
 npm run client-build
-tsc server/*.ts
+npm run server-build
 
 mkdir dist
 mv server/*.js dist/

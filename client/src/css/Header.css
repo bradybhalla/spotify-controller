@@ -1,0 +1,15 @@
+.header {
+    background-color: var(--bs-gray-dark);
+}
+
+.header-text {
+    color: var(--bs-gray-300);
+}
+
+.check {
+    color: var(--bs-green);
+}
+
+.x {
+    color: var(--bs-red);
+}
