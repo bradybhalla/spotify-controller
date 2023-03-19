@@ -2,7 +2,7 @@
     background-color: var(--bs-gray-dark);
 }
 
-.header-text {
+.header-text, .header-text:hover, .header-text:focus {
     color: var(--bs-gray-300);
 }
 

@@ -10,6 +10,7 @@ import SearchBar from "./SearchBar";
 
 const socket = io();
 
+
 export default function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
 
@@ -36,13 +37,13 @@ export default function App() {
   return (
     <>
 
-        <Header connected={isConnected} />
+      <Header connected={isConnected} />
 
-        <SearchBar />
+      <SearchBar />
 
-        <SongLists />
+      <SongLists />
 
-        <SongBar />
+      <SongBar />
     </>
 
   );

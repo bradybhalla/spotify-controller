@@ -1,11 +1,16 @@
-import { Row } from "react-bootstrap";
-import { Socket } from "socket.io-client";
 
-export default function SearchBar(){
+import { Button, Form, InputGroup, Row } from "react-bootstrap";
+import { MusicNote, Search, SearchHeart } from "react-bootstrap-icons";
 
-    return (
-        <Row>
-            <input type="text" placeholder="asdf" />
-        </Row>
-    );
+import "./css/SearchBar.css";
+
+export default function SearchBar() {
+
+  return (
+  <div className="input-group">
+      <input className="form-control bg-white" type="text" placeholder="Add a song to the queue..." />
+      <MusicNote className="search-icon" size="20px" color="gray" />
+  </div>
+  );
 }
+

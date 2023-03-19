@@ -10,7 +10,7 @@ import "./css/Header.css";
 function Icon(props: { connected: boolean }) {
   const connected = props.connected;
 
-  const size = "32px";
+  const size = "36px";
 
   useEffect(()=>{
     // socket things
@@ -55,7 +55,7 @@ export default function Header(props: { connected: boolean }) {
 
     <Navbar className="header">
       <Container fluid>
-        <Navbar.Brand className="header-text" href="#">
+        <Navbar.Brand className="header-text">
           <img
             src="/logo.svg"
             width="30"
