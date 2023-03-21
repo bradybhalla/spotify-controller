@@ -2,6 +2,7 @@
 node_modules
 dist
 server/*.js
+server/api_key.txt
 
 ## Vite vv
 

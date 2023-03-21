@@ -5,7 +5,6 @@ import "../scss/custom.scss";
 
 import App from "./App";
 
-
 const params = new URLSearchParams(location.search);
 
 

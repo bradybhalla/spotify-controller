@@ -60,13 +60,13 @@ export default function Header() {
       socket.off("disconnect", onDisconnect);
     };
 
-  });
+  }, []);
 
   return (
 
     <Navbar className="header">
       <Container fluid>
-        <Navbar.Brand className="header-text">
+        <Navbar.Brand className="header-text" href="#">
           <img
             src="/logo.svg"
             width="30"

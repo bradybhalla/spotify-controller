@@ -23,17 +23,11 @@ export default function App({ name, id }: { name: string | null; id: string | nu
   } else {
     return (
       <>
-
         <Header />
-
         <SearchBar />
-
         <SongLists />
-
         <SongBar />
-      
       </>
-
     );
   }
   

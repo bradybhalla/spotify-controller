@@ -3,7 +3,6 @@
     min-height: 0;
 }
 
-
 .song-list-row {
     height: 100%;
 }
@@ -12,10 +11,10 @@
     height: 100%;
     border-right: 2px solid black;
     overflow-y: scroll;
+    padding-top: 10px;
 }
 
 .song-list-col:last-child {
     height: 100%;
     border-right: none;
 }
-

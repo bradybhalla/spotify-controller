@@ -1,7 +1,5 @@
 import { Container } from "react-bootstrap";
 
-import "./css/NameForm.css";
-
 export default function NameForm() {
   return (
     <Container className="mt-5 flex-fill">

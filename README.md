@@ -2,4 +2,8 @@
 
 This is an application I am working on to allow a group of people to easily play songs together.
 
-After cloning, run `npm run install-all` to install dependencies and then `npm run dev` to check that it works.
+## Usage
+  1) Clone this repository
+  2) Install dependencies: `npm run install-all`
+  3) Add your Spotify API key: `npm run authenticate`
+  4) Try it out: `npm run dev`

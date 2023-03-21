@@ -17,7 +17,7 @@
     z-index: 20;
 }
 
-.results-wrapper {
+#search-results {
     position: absolute;
     background-color: rgba(255,255,255,1);
     top: var(--search-height);
@@ -26,7 +26,7 @@
 }
 
 .result {
-    border-bottom: 2px solid var(--bs-gray-600);
+    border-bottom: 1px solid black;
     padding: 5px;
 }
 
@@ -34,6 +34,10 @@
     border-bottom: none;
 }
 
+.result:hover {
+    background-color: rgb(150,150,150);
+}
+
 .result.selected {
-    background-color: rgba(100, 100, 100, 0.7);
+    background-color: rgb(150,150,150);
 }
