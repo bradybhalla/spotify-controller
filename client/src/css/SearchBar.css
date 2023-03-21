@@ -1,5 +1,5 @@
 .form-control, .form-control:focus {
-    height: 40px;
+    height: var(--search-height);
     z-index: 10;
 
     border: none;
@@ -15,4 +15,25 @@
     top: 10px;
     right: 10px;
     z-index: 20;
+}
+
+.results-wrapper {
+    position: absolute;
+    background-color: rgba(255,255,255,1);
+    top: var(--search-height);
+    left: 5px;
+    right: 5px;
+}
+
+.result {
+    border-bottom: 2px solid var(--bs-gray-600);
+    padding: 5px;
+}
+
+.result:last-child {
+    border-bottom: none;
+}
+
+.result.selected {
+    background-color: rgba(100, 100, 100, 0.7);
 }

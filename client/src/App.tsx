@@ -1,50 +1,40 @@
 import { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Form } from "react-bootstrap";
 
-import { io } from 'socket.io-client';
+import { socket } from "./socket";
 
 import Header from "./Header";
-import SongLists from "./SongLists";
-import SongBar from "./SongBar";
+import NameForm from "./NameForm";
 import SearchBar from "./SearchBar";
-
-const socket = io();
-
-
-export default function App() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
-
-  useEffect(() => {
-
-    const onConnect = () => {
-      setIsConnected(true);
-    };
-
-    const onDisconnect = () => {
-      setIsConnected(false);
-    };
+import SongBar from "./SongBar";
+import SongLists from "./SongLists";
 
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
+export default function App({ name, id }: { name: string | null; id: string | null; }) {
 
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  });
+  if (name == null || id == null) {
+    return (
+      <>
+        <Header />
+        <NameForm />
+        <SongBar />
+      </>
+    );
+  } else {
+    return (
+      <>
 
-  return (
-    <>
+        <Header />
 
-      <Header connected={isConnected} />
+        <SearchBar />
 
-      <SearchBar />
+        <SongLists />
 
-      <SongLists />
+        <SongBar />
+      
+      </>
 
-      <SongBar />
-    </>
-
-  );
+    );
+  }
+  
 }

@@ -1,5 +1,6 @@
 .header {
     background-color: var(--bs-gray-dark);
+    height: var(--header-height);
 }
 
 .header-text, .header-text:hover, .header-text:focus {

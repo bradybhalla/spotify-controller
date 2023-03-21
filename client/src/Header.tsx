@@ -7,19 +7,11 @@ import { Socket } from "socket.io-client";
 
 import "./css/Header.css";
 
-function Icon(props: { connected: boolean }) {
-  const connected = props.connected;
+import {socket} from "./socket";
+
+function Icon({ connected }: { connected: boolean; }) {
 
   const size = "36px";
-
-  useEffect(()=>{
-    // socket things
-
-    return ()=>{
-      // cleanup
-    }
-  })
-
 
   const iconType = connected ? Check : X;
   
@@ -47,9 +39,28 @@ function Icon(props: { connected: boolean }) {
 
 }
 
-export default function Header(props: { connected: boolean }) {
+export default function Header() {
 
-  const connected = props.connected;
+  const [isConnected, setIsConnected] = useState(socket.connected);
+
+  useEffect(() => {
+    const onConnect = () => {
+      setIsConnected(true);
+    };
+    const onDisconnect = () => {
+      setIsConnected(false);
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
+
+  });
 
   return (
 
@@ -64,7 +75,7 @@ export default function Header(props: { connected: boolean }) {
           /> &nbsp; Spotify Controller
         </Navbar.Brand>
         <Navbar.Collapse className="justify-content-end">
-          <Icon connected={connected} />
+          <Icon connected={isConnected} />
         </Navbar.Collapse>
       </Container>
     </Navbar>
