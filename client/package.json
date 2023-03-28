@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^16.2.0"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.6",

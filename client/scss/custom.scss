@@ -10,6 +10,7 @@ $body-bg: rgb(200,200,200);
     --header-height: 60px;
     --search-height: 40px;
     --footer-height: 80px;
+    --body-bg-color: #{$body-bg};
 }
 
 @import "../node_modules/bootstrap/scss/bootstrap";

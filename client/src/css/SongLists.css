@@ -5,6 +5,7 @@
 
 .song-list-row {
     height: 100%;
+    overflow-x: scroll;
 }
 
 .song-list-col {
@@ -12,9 +13,85 @@
     border-right: 2px solid black;
     overflow-y: scroll;
     padding-top: 10px;
+    min-width: 300px;
 }
 
 .song-list-col:last-child {
     height: 100%;
     border-right: none;
+}
+
+#show-all-btn {
+    position: absolute;
+    bottom: calc(var(--footer-height) + 3px);
+    right: 5px;
+    font-size: 20px;
+}
+
+#show-all-btn.activated {
+    background-color: lightgray;
+    color: var(--bs-primary);
+}
+
+.draggable {
+  top: auto !important;
+  left: auto !important;
+}
+
+.list-group-item {
+    background-color: var(--body-bg-color);
+    opacity: 1;
+}
+
+.list-group-item .drag-icon {
+    color: var(--body-bg-color);
+}
+
+.list-group-item:hover .drag-icon {
+    color: rgb(0, 0, 0);
+}
+
+
+.trash-button {
+    background-color: var(--body-bg-color);
+    transition: background-color ease 0s;
+    border: none;
+}
+
+.trash-button:hover {
+    background-color: #B23333;
+    transition: background-color ease 0s;
+}
+
+.list-group-item .trash-button .trash-icon {
+    color: var(--body-bg-color);
+}
+
+.list-group-item:hover .trash-button .trash-icon {
+    color: #B23333;
+}
+
+.list-group-item:hover .trash-button:hover .trash-icon {
+    color: white;
+}
+
+.list-group-item.dragging {
+    border-radius: 10px;
+    border: 1px solid black;
+}
+.list-group-item.dragging .trash-button{
+    transition: background-color ease 0s;
+}
+.list-group-item.dragging .trash-button .trash-icon{
+    color: #B23333;
+}
+.list-group-item.dragging .drag-icon{
+    color: rgb(0, 0, 0);
+}
+
+.list-group-item.not-dragging .trash-button,
+.list-group-item.not-dragging .trash-button .trash-icon,
+.list-group-item.not-dragging .drag-icon {
+    color: var(--body-bg-color);
+    background-color: var(--body-bg-color);
 }

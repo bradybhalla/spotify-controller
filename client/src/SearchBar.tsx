@@ -1,31 +1,32 @@
 
-import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
-import { MusicNote, Search, SearchHeart } from "react-bootstrap-icons";
+import { useState } from "react";
+import { MusicNote } from "react-bootstrap-icons";
+import { Song } from "../../shared_types";
 
-import { getApiKey } from "./apiManager";
+import { getSearchResults } from "./apiManager";
 
 import "./css/SearchBar.css";
+import { socket } from "./socket";
 
-function SearchResult({selected }: { selected?: boolean }) {
+function SearchResult({ song, selected }: { song: Song, selected?: boolean; }) {
 
   selected ??= false;
 
   return (
     <div className={"result" + (selected ? " selected" : "")}>
-      This is a search result
+      {song.title}, {song.artist}, {song.songLink}
     </div>
   );
 }
 
 export default function SearchBar() {
 
-  const [searchResults, setSearchResults] = useState<number[]>([]);
+  const [searchResults, setSearchResults] = useState<Song[]>([]);
 
-  function updateResults(query: string){
-    setSearchResults([]);
-    console.log("Searching for result");
-
+  function updateResults(query: string) {
+    getSearchResults(query).then(json => {
+      setSearchResults(json);
+    });
   }
 
   return (
@@ -35,7 +36,7 @@ export default function SearchBar() {
         type="text"
         placeholder="Add a song to the queue..."
         onChange={(e) => {
-          updateResults(e.target.value)
+          updateResults(e.target.value);
         }}
         onFocus={
           () => {
@@ -51,7 +52,14 @@ export default function SearchBar() {
           (e) => {
             if (e.code == "Enter") {
               const el = (e.target as HTMLInputElement);
-              console.log(el.value)
+              console.log(el.value);
+              socket.emit("enqueue-song", {
+                title: el.value,
+                album: "",
+                artist: "",
+                songLink: "",
+                imgLink: ""
+              });
               el.value = "";
               (document.activeElement as HTMLElement).blur();
             }
@@ -62,10 +70,11 @@ export default function SearchBar() {
       
       <div id="search-results" className="d-none">
         {
-          searchResults.map(resData => {
-
-            return <SearchResult />
-          })
+          searchResults.map((result, index) => 
+            <SearchResult 
+              song={result}
+              key={index}
+            />)
         }
       </div>
       

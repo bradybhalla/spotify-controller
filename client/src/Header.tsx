@@ -1,13 +1,8 @@
-import React from "react";
-import { createElement, useEffect, useRef, useState } from "react";
-import { Container, Navbar, Overlay, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { createElement } from "react";
+import { Container, Navbar, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Check, X } from 'react-bootstrap-icons';
-import ReactDOM from "react-dom";
-import { Socket } from "socket.io-client";
 
 import "./css/Header.css";
-
-import {socket} from "./socket";
 
 function Icon({ connected }: { connected: boolean; }) {
 
@@ -39,28 +34,7 @@ function Icon({ connected }: { connected: boolean; }) {
 
 }
 
-export default function Header() {
-
-  const [isConnected, setIsConnected] = useState(socket.connected);
-
-  useEffect(() => {
-    const onConnect = () => {
-      setIsConnected(true);
-    };
-    const onDisconnect = () => {
-      setIsConnected(false);
-    };
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-    };
-
-  }, []);
+export default function Header({connected}: {connected:boolean}) {
 
   return (
 
@@ -75,7 +49,7 @@ export default function Header() {
           /> &nbsp; Spotify Controller
         </Navbar.Brand>
         <Navbar.Collapse className="justify-content-end">
-          <Icon connected={isConnected} />
+          <Icon connected={connected} />
         </Navbar.Collapse>
       </Container>
     </Navbar>

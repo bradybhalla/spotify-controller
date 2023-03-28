@@ -23,6 +23,7 @@
     top: var(--search-height);
     left: 5px;
     right: 5px;
+    z-index: 10;
 }
 
 .result {
