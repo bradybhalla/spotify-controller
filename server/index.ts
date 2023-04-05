@@ -12,12 +12,12 @@ import { changeSong, getCurrSong, getKey, getTracksInfo, refreshKey, searchSpoti
 /**
  * Get needed authentication data
  */
-
+let authData: {basic:string, redirect:string, id:string};
 if (!existsSync(__dirname + "/auth.json")){
   console.log("Run \"npm run authenticate\" first");
   process.exit();
 } else {
-  const authData = JSON.parse(readFileSync(__dirname + "/auth.json").toString())
+  authData = JSON.parse(readFileSync(__dirname + "/auth.json").toString())
   setAuth(authData.basic, authData.redirect);
 }
 
@@ -234,9 +234,9 @@ app.get("/login", (req, res) => {
   const scope = "user-read-playback-state user-modify-playback-state";
   const url = "https://accounts.spotify.com/authorize?" + stringify({
     response_type: "code",
-    client_id: "c05ca5be997a4566afcfebca1253b8bd",
+    client_id: authData.id,
     scope: scope,
-    redirect_uri: "http://localhost:8080/authorize"
+    redirect_uri: authData.redirect
   });
   res.redirect(url);
 });

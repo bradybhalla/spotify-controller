@@ -35,7 +35,8 @@ rl.question("Client Id: ", (s: string) => {
       rl.close();
       writeFileSync(__dirname + "/auth.json", JSON.stringify({
         basic: Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
-        redirect: redirectURI
+        redirect: redirectURI,
+        id: clientId
       }));
     });
   });

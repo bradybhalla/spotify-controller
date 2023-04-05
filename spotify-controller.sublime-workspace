@@ -678,15 +678,17 @@
 	},
 	"expanded_folders":
 	[
+		"/Users/bradybhalla/Desktop/Code/spotify-controller",
+		"/Users/bradybhalla/Desktop/Code/spotify-controller/scripts"
 	],
 	"file_history":
 	[
+		"/Users/bradybhalla/Desktop/Code/spotify-controller/scripts/setup.sh",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/README.md",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/server/authenticate.ts",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/server/index.ts",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/server/spotifyApi.ts",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/scripts/build.sh",
-		"/Users/bradybhalla/Desktop/Code/spotify-controller/scripts/setup.sh",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/package.json",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/client/src/SearchBar.tsx",
 		"/Users/bradybhalla/Desktop/Code/spotify-controller/client/src/SongBar.tsx",
@@ -754,7 +756,7 @@
 	],
 	"find":
 	{
-		"height": 44.0
+		"height": 32.0
 	},
 	"find_in_files":
 	{
@@ -911,7 +913,7 @@
 	"project": "spotify-controller.sublime-project",
 	"replace":
 	{
-		"height": 80.0
+		"height": 60.0
 	},
 	"save_all_on_build": true,
 	"select_file":

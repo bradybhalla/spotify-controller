@@ -7,7 +7,7 @@ export type User = {
   name: string;
 };
 export type ConnectionInfo = {id: string} & APIKey
-export type UserOrder = (typeof user.id)[];
+export type UserOrder = string[];
 
 export type SearchQuery = {
   query: string;
