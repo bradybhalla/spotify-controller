@@ -5,13 +5,13 @@
 
 .song-list-row {
     height: 100%;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .song-list-col {
     height: 100%;
     border-right: 2px solid black;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding-top: 10px;
     min-width: 300px;
 }
