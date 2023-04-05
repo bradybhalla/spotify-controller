@@ -3,6 +3,7 @@ node_modules
 dist
 server/*.js
 server/api_key.txt
+communication planning.md
 
 ## Vite vv
 
