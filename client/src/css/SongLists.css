@@ -21,6 +21,10 @@
     border-right: none;
 }
 
+h3.underline {
+    text-decoration: underline;
+}
+
 #show-all-btn {
     position: absolute;
     bottom: calc(var(--footer-height) + 3px);

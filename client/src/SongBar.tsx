@@ -23,24 +23,25 @@ function SongTime({ currTime, maxTime, paused }: { currTime: number; maxTime: nu
   const startTime = Math.min(currTime, maxTime);
   const [time, setTime] = useState(Math.min(currTime, maxTime));
 
-  useEffect(() => {
+  useEffect(()=>{
+    setTime(Math.min(currTime, maxTime));
     if (!paused) {
       const interval = setInterval(() => {
-        setTime(Math.min(startTime + (Date.now() - startTimestamp) / 1000, maxTime));
-      }, 500);
+        setTime(Math.min(startTime + Math.floor((Date.now() - startTimestamp)/1000), maxTime));
+      }, 200);
 
       return () => { clearInterval(interval); };
     }
-  }, []);
+  }, [currTime, maxTime, paused])
 
   return (
     <div className="song-time d-none d-sm-flex align-items-center ms-5">
-      <span className="me-1">
+      <span className="me-1 time">
         {Math.floor(time / 60)}:
         {`${Math.floor(time % 60)}`.padStart(2, "0")}
       </span>
       <ProgressBar now={time / maxTime * 100} id="time" />
-      <span className="ms-1">
+      <span className="ms-1 time">
         {Math.floor(maxTime / 60)}:
         {`${Math.floor(maxTime % 60)}`.padStart(2, "0")}
       </span>
@@ -49,26 +50,13 @@ function SongTime({ currTime, maxTime, paused }: { currTime: number; maxTime: nu
 }
 
 
-export default function SongBar() {
-
-  const currSong: PlayingSong = {
-    song: {
-      title: "New Slang",
-      album: "Oh Inverted World",
-      artist: "The Shins",
-      songLink: "spotify.com/new_slang",
-      imgLink: "https://i.scdn.co/image/ab67616d000048514205b816277c7f9dba098d28"
-    },
-    time: {
-      current: 280,
-      total: 300
-    },
-    paused: false,
-    requester: {
-      id: "10101",
-      name: "Brady"
-    }
-  };
+export default function SongBar({ currSong }: { currSong: PlayingSong | null; }) {
+  if (currSong == null) {
+    return (
+      <Container fluid className="footer d-flex align-items-center justify-content-center">
+      </Container>
+    ); 
+  }
 
   return (
     <Container fluid className="footer d-flex align-items-center justify-content-center">

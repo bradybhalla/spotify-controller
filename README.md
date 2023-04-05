@@ -1,9 +1,10 @@
 # spotify-controller
 
-This is an application I am working on to allow a group of people to easily play songs together.
+This is an application which allows a group of people to easily play songs together from one device.
 
-## Usage
+## Setup / Usage
   1) Clone this repository
-  2) Install dependencies: `npm run install-all`
-  3) Add your Spotify API key: `npm run authenticate`
-  4) Try it out: `npm run dev`
+  2) `npm run setup`
+  3) `npm run authenticate` and follow instructions
+  4) `node dist/index.js`
+

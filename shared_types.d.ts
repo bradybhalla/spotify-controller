@@ -21,7 +21,7 @@ export type Song = {
   title: string,
   album: string,
   artist: string,
-  songLink: string,
+  uri: string,
   imgLink: string;
 };
 export type PlayingSong = {
@@ -48,7 +48,7 @@ export type UserChangeData = {
   order: UserOrder;
 };
 export type NewUserData = UserChangeData & {
-  songs?: Song[]
+  songs: Song[]
 }
 export type NewSongData = {
   user: User,

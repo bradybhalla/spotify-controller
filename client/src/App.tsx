@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Header from "./Header";
 import NameForm from "./NameForm";
@@ -7,7 +7,7 @@ import SongBar from "./SongBar";
 import SongLists from "./SongLists";
 
 import { socket } from "./socket";
-import { APIKey, EntireQueue, ModifiedQueueData, NewSongData, NewUserData, PlayingSong, SingleQueue, UserChangeData } from "../../shared_types";
+import { APIKey, EntireQueue, NewSongData, NewUserData, PlayingSong, SingleQueue, UserChangeData } from "../../shared_types";
 import { getQueue, getSongInfo, setApiKey } from "./apiManager";
 
 
@@ -15,7 +15,14 @@ export default function App({ name, id }: { name: string | null; id: string | nu
 
   const [isConnected, setIsConnected] = useState(socket.connected);
 
-  const [queue, setQueue] = useState<EntireQueue | null>(null);
+  const [queue, setQueue] = useState<EntireQueue>({ data: [], order: [] });
+  const queueRef = useRef(queue);
+
+  const [currSong, setCurrSong] = useState<PlayingSong | null>(null);
+
+  useEffect(() => {
+    queueRef.current = queue;
+  }, [queue]);
 
   useEffect(() => {
     const onConnect = () => {
@@ -32,11 +39,18 @@ export default function App({ name, id }: { name: string | null; id: string | nu
       setApiKey(key.key);
       getQueue().then(json => {
         setQueue(json);
+      }).catch(() => {
+        setQueue({ data: [], order: [] });
       });
+      getSongInfo().then(json=>{
+        setCurrSong(json);
+      })
     };
 
     const newUser = (data: NewUserData) => {
-      // TODO
+      const newQueue = { data: queueRef.current.data, order: Array.from(data.order) };
+      newQueue.data.push({ user: data.user, songs: data.songs });
+      setQueue(newQueue);
     };
 
     const removeUser = (data: UserChangeData) => {
@@ -44,15 +58,29 @@ export default function App({ name, id }: { name: string | null; id: string | nu
     };
 
     const enqueueSong = (data: NewSongData) => {
-      // TODO
+      const newQueue = { data: Array.from(queueRef.current.data), order: Array.from(queueRef.current.order) };
+      for (const q of newQueue.data) {
+        if (q.user.id == data.user.id) {
+          q.user.name = data.user.name;
+          q.songs.push(data.song);
+        }
+      }
+      setQueue(newQueue);
     };
 
     const modifyQueue = (data: SingleQueue) => {
-      // TODO
+      const newQueue = { data: Array.from(queueRef.current.data), order: Array.from(queueRef.current.order) };
+      for (const q of newQueue.data) {
+        if (q.user.id == data.user.id) {
+          q.user.name = data.user.name;
+          q.songs = data.songs;
+        }
+      }
+      setQueue(newQueue);
     };
 
     const changePlayingSong = (song: PlayingSong) => {
-      // TODO
+      setCurrSong(song);
     };
 
 
@@ -84,7 +112,7 @@ export default function App({ name, id }: { name: string | null; id: string | nu
       <>
         <Header connected={isConnected} />
         <NameForm />
-        <SongBar />
+        <SongBar currSong={currSong} />
       </>
     );
   } else {
@@ -92,8 +120,8 @@ export default function App({ name, id }: { name: string | null; id: string | nu
       <>
         <Header connected={isConnected} />
         <SearchBar />
-        <SongLists queue={queue} />
-        <SongBar />
+        <SongLists queue={queue} userId={id} currentRequesterId={currSong==undefined?"":currSong.requester.id} />
+        <SongBar currSong={currSong} />
       </>
     );
   }

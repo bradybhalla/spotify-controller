@@ -2,18 +2,25 @@ import { DragDropContext, Draggable, DragStart, Droppable, DropResult } from "@h
 import { useState } from "react";
 import { Button, Col, Container, ListGroup, ListGroupItem, Row } from "react-bootstrap";
 import { GripHorizontal, PlusSquare, Trash3 } from "react-bootstrap-icons";
-import { DevSong, EntireQueue, SingleQueue, User } from "../../shared_types";
+import { EntireQueue, SingleQueue, Song, User } from "../../shared_types";
 
 import "./css/SongLists.css";
+import { socket } from "./socket";
 
-function SongDisplay({ song }: { song: DevSong; }) {
+function SongDisplay({ song }: { song: Song; }) {
 
   return (
-    <div>{song.title}</div>
+    <>
+      <img src={song.imgLink} style={{ width: "25px", height: "25px" }} className="me-2" />
+      <div>
+        <span>{song.title}</span>
+        <span><i>, {song.artist}</i></span>
+      </div>
+    </>
   );
 }
 
-function DraggableSongListItem({ song, index, draggingIndex, onDelete, ...other }: { song: DevSong; index: number; draggingIndex: number | null; onDelete: () => void; }) {
+function DraggableSongListItem({ song, index, draggingIndex, onDelete }: { song: Song; index: number; draggingIndex: number | null; onDelete: () => void; }) {
   return (
     <Draggable draggableId={`${index}`} index={index}>
       {(provided) => (
@@ -31,14 +38,14 @@ function DraggableSongListItem({ song, index, draggingIndex, onDelete, ...other 
   );
 }
 
-function SongList({ user, songs, viewAllActivated }: { user: User; songs: DevSong[]; viewAllActivated: boolean; }) {
+function SongList({ user, songs, viewAllActivated, currentRequester }: { user: User; songs: Song[]; viewAllActivated: boolean; currentRequester: boolean; }) {
   return (
     <Col className={"song-list-col" + (viewAllActivated ? "" : " d-none d-sm-block")}>
-      <h3>{user.name}</h3>
+      <h3 className={currentRequester ? "underline" : ""}>{user.name}</h3>
       <ListGroup className="list-group-flush">
         {
           songs.map((el, index) => (
-            <ListGroupItem key={index}>
+            <ListGroupItem className="d-flex" key={index}>
               <SongDisplay song={el} />
             </ListGroupItem>
           ))
@@ -49,11 +56,10 @@ function SongList({ user, songs, viewAllActivated }: { user: User; songs: DevSon
 }
 
 
-function ModifiableSongList({ user, songs }: { user: User; songs: DevSong[]; }) {
+function ModifiableSongList({ user, songs, currentRequester }: { user: User; songs: Song[]; currentRequester: boolean; }) {
 
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
-  const [songsState, setSongsState] = useState(songs);
 
   const onDragStart = (start: DragStart) => {
     setDraggingIndex(start.source.index);
@@ -68,10 +74,10 @@ function ModifiableSongList({ user, songs }: { user: User; songs: DevSong[]; }) 
     ) {
       
     } else {
-      const newSongs = Array.from(songsState);
+      const newSongs = Array.from(songs);
       newSongs.splice(source.index, 1);
-      newSongs.splice(destination.index, 0, songsState[source.index]);
-      setSongsState(newSongs);
+      newSongs.splice(destination.index, 0, songs[source.index]);
+      socket.emit("modify-queue", newSongs);
     }
 
     setDraggingIndex(null);
@@ -80,7 +86,7 @@ function ModifiableSongList({ user, songs }: { user: User; songs: DevSong[]; }) 
 
   return (
     <Col className="song-list-col">
-      <h3>{user.name}</h3>
+      <h3 className={currentRequester ? "underline" : ""}>{user.name}</h3>
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Droppable droppableId="droppable">
           {
@@ -89,12 +95,11 @@ function ModifiableSongList({ user, songs }: { user: User; songs: DevSong[]; }) 
               <ListGroup className="" ref={provided.innerRef} {...provided.droppableProps}>
       
                 {
-                  songsState.map((el, index) => (
+                  songs.map((el, index) => (
                     <DraggableSongListItem key={index} index={index} song={el} draggingIndex={draggingIndex} onDelete={() => {
-                      const newSongs = Array.from(songsState);
+                      const newSongs = Array.from(songs);
                       newSongs.splice(index, 1);
-                      setSongsState(newSongs);
-                      // send delete to server
+                      socket.emit("modify-queue", newSongs);
                     }} />
                   ))
                 }
@@ -111,42 +116,43 @@ function ModifiableSongList({ user, songs }: { user: User; songs: DevSong[]; }) 
   );
 }
 
-export default function SongLists({ queue }: { queue: EntireQueue | null; }) {
-  if (queue == null) {
-    return (
-      <Container fluid className="song-list-container">
-        <Row className="song-list-row flex-nowrap">
-          <Col></Col>
-        </Row>
-      </Container>
-    );
-  }
+export default function SongLists({ queue, userId, currentRequesterId }: { queue: EntireQueue; userId: string; currentRequesterId: string; }) {
+
+  const [viewAllActivated, setViewAllActivated] = useState(false);
 
   // map id to queue
   const allSongs: Map<string, SingleQueue> = new Map();
 
-  for (const q of queue.data){
+  for (const q of queue.data) {
     allSongs.set(q.user.id, q);
   }
 
   const songOrder = queue.order;
 
-  console.log(allSongs, songOrder)
+  const currIndex = songOrder.indexOf(userId);
+  if (currIndex == -1) {
+    return (
+      <Container fluid className="song-list-container">
+        <Row className="song-list-row flex-nowrap"></Row>
+      </Container>
+    );
+  }
 
-  const [viewAllActivated, setViewAllActivated] = useState(false);
+  const lists = [];
+  for (let i = 0; i < songOrder.length; i++) {
+    const id = songOrder[(i + currIndex) % songOrder.length];
+    const data = allSongs.get(id)!;
+    if (i == 0) {
+      lists.push(<ModifiableSongList key={id} user={data.user} songs={data.songs} currentRequester={id == currentRequesterId} />);
+    } else {
+      lists.push(<SongList key={id} user={data.user} songs={data.songs} viewAllActivated={viewAllActivated} currentRequester={id == currentRequesterId} />);
+    }
+  }
 
   return (
     <Container fluid className="song-list-container">
       <Row className="song-list-row flex-nowrap">
-        {
-          songOrder.map((id, index) => {
-            const data = allSongs.get(id)!;
-            if (index == 0) {
-              return <ModifiableSongList key={id} user={data.user} songs={data.songs} />;
-            }
-            return <SongList key={id} user={data.user} songs={data.songs} viewAllActivated={viewAllActivated} />;
-          })
-        }
+        {lists}
       </Row>
       <Button id="show-all-btn" className={"d-xs-block d-sm-none" + (viewAllActivated ? " activated" : "")} onClick={() => setViewAllActivated(!viewAllActivated)}><PlusSquare /></Button>
     </Container>

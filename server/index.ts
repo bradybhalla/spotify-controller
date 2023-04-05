@@ -1,10 +1,25 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import { stringify } from "qs";
+import readline from "readline";
+import {existsSync, readFileSync} from "fs";
+
 import { ConnectionInfo, EntireQueue, PlayingSong, SingleQueue, Song, User } from "../shared_types";
 
-import { searchSpotify } from "./spotifyApi";
+import { changeSong, getCurrSong, getKey, getTracksInfo, refreshKey, searchSpotify, setAuth } from "./spotifyApi";
 
+/**
+ * Get needed authentication data
+ */
+
+if (!existsSync(__dirname + "/auth.json")){
+  console.log("Run \"npm run authenticate\" first");
+  process.exit();
+} else {
+  const authData = JSON.parse(readFileSync(__dirname + "/auth.json").toString())
+  setAuth(authData.basic, authData.redirect);
+}
 
 /**
  * Which port to run the server on
@@ -16,14 +31,6 @@ const port = 8080;
  */
 const app = express();
 app.use(express.json());
-
-
-
-// REMOVE LATER
-const cors = require('cors');
-app.use(cors());
-
-
 
 
 /**
@@ -45,24 +52,42 @@ const queue: Map<string, SingleQueue> = new Map();
 const order: string[] = [];
 
 // current song information
-const currentSong: PlayingSong | null = {
-  song: {
-    title: "New Slang",
-    album: "Oh Inverted World",
-    artist: "The Shins",
-    songLink: "spotify.com/new_slang",
-    imgLink: "https://i.scdn.co/image/ab67616d000048514205b816277c7f9dba098d28"
-  },
-  time: {
-    current: 200,
-    total: 300
-  },
-  paused: true,
-  requester: {
-    id: "10101",
-    name: "Brady"
+let currentSong: PlayingSong | null = null;
+let currentSongUpdatedTimestamp: number = Date.now();
+let currentSongChanging: boolean = false;
+
+function nextUri() {
+  if (order.length == 0) {
+    return "spotify:track:1301WleyT98MSxVHPZCA6M";
   }
-};
+  let currId = currentSong?.requester.id;
+  if (currId == undefined || currId == "") {
+    currId = order[0];
+  }
+  const currIdIndex = order.indexOf(currId);
+
+  let nextId: string | null = null;
+  for (let i = 1; i <= order.length; i++) {
+    let index = (currIdIndex + i) % order.length;
+    if (queue.get(order[index])!.songs.length > 0) {
+      nextId = order[index];
+      break;
+    }
+  }
+
+  if (nextId == null) {
+    return "spotify:track:1301WleyT98MSxVHPZCA6M";
+  }
+
+  const nextSong = queue.get(nextId)!.songs.splice(0, 1)[0];
+  if (currentSong != null) {
+    currentSong.requester = queue.get(nextId)!.user;
+  }
+  io.emit("modify-queue", queue.get(nextId));
+
+
+  return nextSong.uri;
+}
 
 
 
@@ -71,12 +96,7 @@ const currentSong: PlayingSong | null = {
  */
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",     // GET RID OF THIS CORS STUFF LATER
-    methods: ["GET", "POST"]
-  }
-});
+const io = new Server(server);
 
 io.on("connection", (socket) => {
   /**
@@ -93,6 +113,7 @@ io.on("connection", (socket) => {
     if (!queue.has(user.id)) {
       queue.set(user.id, { user: user, songs: [] });
       order.push(user.id);
+      socket.broadcast.emit("new-user", { user: user, order: order, songs: [] });
     }
     users.set(socket.id, newUser);
     keys.add(newKey);
@@ -135,6 +156,7 @@ io.on("connection", (socket) => {
       user: { id: queueData.user.id, name: queueData.user.name },
       songs: newSongs
     });
+
   });
 
   socket.on("disconnect", () => {
@@ -166,39 +188,153 @@ app.post("/api/search", (req, res) => {
   });
 });
 
+app.post("/api/idsInfo", (req, res) => {
+  if (!keys.has(req.body.key)) {
+    res.send(JSON.stringify([]));
+    return;
+  }
+
+  getTracksInfo(req.body.ids, results => {
+    // send type Song[]
+    res.send(JSON.stringify(results));
+  });
+});
+
 // get current song
 app.post("/api/currentSong", (req, res) => {
   if (!keys.has(req.body.key)) {
     res.send(JSON.stringify({}));
     return;
   }
-
   // send type PlayingSong
   res.send(currentSong);
 });
 
 app.post("/api/queue", (req, res) => {
-  console.log(req.body);
   if (!keys.has(req.body.key)) {
     res.send(JSON.stringify({}));
     return;
   }
 
   const currentQueue: EntireQueue = {
-    data: Array.from(users, ([socketId, { id, key }]) => {
-      const singleQueue = queue.get(id);
-      return singleQueue == undefined ? { user: { name: "", id: "" }, songs: [] } : singleQueue;
-    }),
+    data: Array.from(queue, ([userId, singleQueue]) => singleQueue),
     order: order
   };
 
   res.send(currentQueue);
+
 });
 
+/**
+ * Login to spotify
+ */
+let nextRefreshEvent: NodeJS.Timeout | null = null;
+
+app.get("/login", (req, res) => {
+  const scope = "user-read-playback-state user-modify-playback-state";
+  const url = "https://accounts.spotify.com/authorize?" + stringify({
+    response_type: "code",
+    client_id: "c05ca5be997a4566afcfebca1253b8bd",
+    scope: scope,
+    redirect_uri: "http://localhost:8080/authorize"
+  });
+  res.redirect(url);
+});
+
+function setRefreshTimeout(expiresIn: number) {
+  if (nextRefreshEvent != null) {
+    clearTimeout(nextRefreshEvent);
+  }
+  nextRefreshEvent = setTimeout(() => {
+    refreshKey(expiresIn2 => {
+      setRefreshTimeout(expiresIn2);
+    });
+  }, expiresIn * 900);
+}
+
+app.get("/authorize", (req, res) => {
+  getKey(req.query.code as string, setRefreshTimeout);
+  process.stdout.write("\r\x1b[K");
+
+  res.redirect("/");
+});
+
+
+/**
+ * Background tasks
+ */
+
+// keep current song up to date
+setInterval(() => getCurrSong(currentSong, song => {
+  if (!currentSongChanging) {
+    currentSong = song;
+    currentSongUpdatedTimestamp = Date.now();
+    io.emit("change-playing-song", currentSong);
+  }
+}), 2000);
+
+
+setInterval(() => {
+  if (currentSong == null) {
+    return;
+  }
+  if (!currentSong.paused && !currentSongChanging && currentSong.time.current + (Date.now() - currentSongUpdatedTimestamp) / 1000 + 1 > currentSong.time.total) {
+    currentSongChanging = true;
+    changeSong(nextUri(), () => {
+      getCurrSong(currentSong, song => {
+        currentSong = song;
+        currentSongUpdatedTimestamp = Date.now();
+        io.emit("change-playing-song", currentSong);
+        currentSongChanging = false;
+      }, () => {
+        currentSongChanging = false;
+      });
+
+    }, () => {
+      currentSongChanging = false;
+    });
+  }
+}, 100);
 
 /**
  * Start server
  */
 server.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Client: http://localhost:${port}`);
+  console.log("Controls:\n\t- Fast forward: f\n");
+  process.stdout.write(`Login needed (http://localhost:${port}/login)`)
 });
+
+/**
+ * Handle input
+ */
+
+readline.emitKeypressEvents(process.stdin);
+
+if (process.stdin.setRawMode != null) {
+  process.stdin.setRawMode(true);
+}
+
+process.stdin.on("keypress", (str, key) => {
+  if (key.sequence == "\x03"){
+    process.exit();
+  } else if (key.sequence == "f"){
+    currentSongChanging = true;
+    changeSong(nextUri(), () => {
+      getCurrSong(currentSong, song => {
+        currentSong = song;
+        currentSongUpdatedTimestamp = Date.now();
+        io.emit("change-playing-song", currentSong);
+        currentSongChanging = false;
+        process.stdout.write("fast forward")
+        setTimeout(()=>process.stdout.write("\r\x1b[K"), 1000);
+      }, () => {
+        currentSongChanging = false;
+      });
+
+    }, () => {
+      currentSongChanging = false;
+    });
+  }
+})
+

@@ -9,7 +9,6 @@ npm run server-build
 mkdir dist
 
 mv server/*.js dist/
-cp server/*.txt dist/
 
 mv client/dist/ dist/static/
 

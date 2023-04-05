@@ -1,10 +1,6 @@
-import { socket } from "./socket";
-
 /**
  * Interact with the server's api
  */
-
-const URL = "http://localhost:8080";
 
 
 let apiKey: string | null = null;
@@ -14,7 +10,7 @@ export function setApiKey(key: string){
 }
 
 async function postPromise(path: string, data: Object) {
-  const res = await fetch(URL + path, {
+  const res = await fetch(path, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -28,8 +24,12 @@ export function getSearchResults(query: string){
   return postPromise("/api/search", {query: query, key: apiKey});
 }
 
+export function getLinkInfo(ids: string[]){
+  return postPromise("/api/idsInfo", {ids: ids, key: apiKey});
+}
+
 export function getSongInfo(){
-  return postPromise("/api/currSong", {key: apiKey});
+  return postPromise("/api/currentSong", {key: apiKey});
 }
 
 export function getQueue(){
