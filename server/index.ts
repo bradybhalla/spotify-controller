@@ -301,7 +301,7 @@ setInterval(() => {
  */
 server.listen(port, () => {
   console.log(`Client: http://localhost:${port}`);
-  console.log("Controls:\n\t- Fast forward: f\n");
+  console.log("Controls:\n\t- Fast forward: f\n\t- Disconnect all clients: d");
   process.stdout.write(`Login needed (http://localhost:${port}/login)`)
 });
 
@@ -335,6 +335,11 @@ process.stdin.on("keypress", (str, key) => {
     }, () => {
       currentSongChanging = false;
     });
+  } else if (key.sequence == "d"){
+    currentSong = null;
+    queue.clear()
+    order.splice(0);
+    io.emit("force-disconnect");
   }
 })
 

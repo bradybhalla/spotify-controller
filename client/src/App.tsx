@@ -34,6 +34,9 @@ export default function App({ name, id }: { name: string | null; id: string | nu
     const onDisconnect = () => {
       setIsConnected(false);
     };
+    const onForceDisconnect = ()=>{
+      socket.disconnect();
+    }
 
     const onApiKey = (key: APIKey) => {
       setApiKey(key.key);
@@ -86,6 +89,7 @@ export default function App({ name, id }: { name: string | null; id: string | nu
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("force-disconnect", onForceDisconnect);
     socket.on("api-key", onApiKey);
     socket.on("new-user", newUser);
     socket.on("remove-user", removeUser);
@@ -97,6 +101,7 @@ export default function App({ name, id }: { name: string | null; id: string | nu
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off("force-disconnect", onForceDisconnect);
       socket.off("api-key", onApiKey);
       socket.off("new-user", newUser);
       socket.off("remove-user", removeUser);
