@@ -1,4 +1,4 @@
-import {writeFileSync} from "fs";
+import { writeFileSync } from "fs";
 import { createInterface } from "readline";
 
 
@@ -41,7 +41,4 @@ rl.question("Client Id: ", (s: string) => {
     });
   });
 });
-
-
-
 

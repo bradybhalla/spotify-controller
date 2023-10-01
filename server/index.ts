@@ -3,7 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { stringify } from "qs";
 import readline from "readline";
-import {existsSync, readFileSync} from "fs";
+import { existsSync, readFileSync } from "fs";
 
 import { ConnectionInfo, EntireQueue, PlayingSong, SingleQueue, Song, User } from "../shared_types";
 
@@ -12,12 +12,12 @@ import { changeSong, getCurrSong, getKey, getTracksInfo, refreshKey, searchSpoti
 /**
  * Get needed authentication data
  */
-let authData: {basic:string, redirect:string, id:string};
-if (!existsSync(__dirname + "/auth.json")){
+let authData: { basic: string, redirect: string, id: string; };
+if (!existsSync(__dirname + "/auth.json")) {
   console.log("Run \"npm run authenticate\" first");
   process.exit();
 } else {
-  authData = JSON.parse(readFileSync(__dirname + "/auth.json").toString())
+  authData = JSON.parse(readFileSync(__dirname + "/auth.json").toString());
   setAuth(authData.basic, authData.redirect);
 }
 
@@ -104,7 +104,7 @@ io.on("connection", (socket) => {
    */
   socket.on("user-info", (user: User) => {
     const newKey: string = `${Math.floor(Math.random() * 1e10)}`;
-    
+
     const newUser: ConnectionInfo = {
       id: user.id,
       key: newKey
@@ -119,7 +119,7 @@ io.on("connection", (socket) => {
     keys.add(newKey);
     socket.emit("api-key", { key: newKey });
   });
-  
+
   socket.on("enqueue-song", (song: Song) => {
     const user = users.get(socket.id);
     if (user == null) {
@@ -127,7 +127,7 @@ io.on("connection", (socket) => {
     }
 
     const queueData = queue.get(user.id);
-    if (queueData == null) { 
+    if (queueData == null) {
       return;
     }
 
@@ -141,13 +141,13 @@ io.on("connection", (socket) => {
 
   socket.on("modify-queue", (newSongs: Song[]) => {
     const user = users.get(socket.id);
-    if (user == null) { 
-      return; 
+    if (user == null) {
+      return;
     }
 
     const queueData = queue.get(user.id);
-    if (queueData == null) { 
-      return; 
+    if (queueData == null) {
+      return;
     }
 
     queueData.songs = newSongs;
@@ -273,26 +273,43 @@ setInterval(() => getCurrSong(currentSong, song => {
   }
 }), 2000);
 
+function startNextSong() {
+  let uri: string = nextUri();
+
+  return new Promise((resolve, reject) => {
+    currentSongChanging = true;
+
+    changeSong(uri, () => {
+      // success
+      setTimeout(() => {
+        // after waiting
+        getCurrSong(currentSong, song => {
+          currentSong = song;
+          currentSongUpdatedTimestamp = Date.now();
+          currentSongChanging = false;
+          resolve(null);
+        }, () => {
+          // fail getCurrSong
+          currentSongChanging = false;
+          reject("get current song failed");
+        });
+      }, 1000);
+    }, () => {
+      // fail
+      currentSongChanging = false;
+      reject("change song failed");
+    });
+
+  });
+}
 
 setInterval(() => {
   if (currentSong == null) {
     return;
   }
   if (!currentSong.paused && !currentSongChanging && currentSong.time.current + (Date.now() - currentSongUpdatedTimestamp) / 1000 + 1 > currentSong.time.total) {
-    currentSongChanging = true;
-    changeSong(nextUri(), () => {
-      getCurrSong(currentSong, song => {
-        currentSong = song;
-        currentSongUpdatedTimestamp = Date.now();
-        io.emit("change-playing-song", currentSong);
-        currentSongChanging = false;
-      }, () => {
-        currentSongChanging = false;
-      });
+    startNextSong();
 
-    }, () => {
-      currentSongChanging = false;
-    });
   }
 }, 100);
 
@@ -302,7 +319,7 @@ setInterval(() => {
 server.listen(port, () => {
   console.log(`Client: http://localhost:${port}`);
   console.log("Controls:\n\t- Fast forward: f\n\t- Disconnect all clients: d");
-  process.stdout.write(`Login needed (http://localhost:${port}/login)`)
+  process.stdout.write(`Login needed (http://localhost:${port}/login)`);
 });
 
 /**
@@ -316,28 +333,16 @@ if (process.stdin.setRawMode != null) {
 }
 
 process.stdin.on("keypress", (str, key) => {
-  if (key.sequence == "\x03"){
+  if (key.sequence == "\x03") {
     process.exit();
-  } else if (key.sequence == "f"){
-    currentSongChanging = true;
-    changeSong(nextUri(), () => {
-      getCurrSong(currentSong, song => {
-        currentSong = song;
-        currentSongUpdatedTimestamp = Date.now();
-        io.emit("change-playing-song", currentSong);
-        currentSongChanging = false;
-        process.stdout.write("fast forward")
-        setTimeout(()=>process.stdout.write("\r\x1b[K"), 1000);
-      }, () => {
-        currentSongChanging = false;
-      });
-
-    }, () => {
-      currentSongChanging = false;
+  } else if (key.sequence == "f") {
+    startNextSong().then(() => {
+      process.stdout.write("fast forward");
+      setTimeout(() => process.stdout.write("\r\x1b[K"), 1000);
     });
-  } else if (key.sequence == "d"){
+  } else if (key.sequence == "d") {
     currentSong = null;
-    queue.clear()
+    queue.clear();
     order.splice(0);
     io.emit("force-disconnect");
   }

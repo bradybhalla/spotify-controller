@@ -10,7 +10,7 @@ let refresh_token = "";
 let basic_auth = "";
 let redirect_uri = "";
 
-export function setAuth(_basic_auth: string, _redirect_uri: string){
+export function setAuth(_basic_auth: string, _redirect_uri: string) {
   basic_auth = _basic_auth;
   redirect_uri = _redirect_uri;
 }
@@ -32,7 +32,7 @@ export function refreshKey(callback: (expiresIn: number) => void) {
     callback(res.data.expires_in);
   }).catch(err => {
     if (VERBOSE) {
-      console.log("(Failed) to refreshed access token");
+      console.log("(Failed) to refresh access token");
     }
   });
 }
@@ -190,7 +190,7 @@ export function getCurrSong(prevSong: PlayingSong | null, callback: (res: Playin
   });
 }
 
-export function changeSong(uri: string, callback: () => void, errCallback?: ()=>void) {
+export function changeSong(uri: string, callback: () => void, errCallback?: () => void) {
   axios.put(
     "https://api.spotify.com/v1/me/player/play",
     {
@@ -210,7 +210,7 @@ export function changeSong(uri: string, callback: () => void, errCallback?: ()=>
     if (VERBOSE) {
       console.log("(Failed) Change song");
     }
-    if (errCallback != undefined){
+    if (errCallback != undefined) {
       errCallback();
     }
   });
