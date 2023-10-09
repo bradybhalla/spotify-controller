@@ -58,7 +58,7 @@ let currentSongChanging: boolean = false;
 
 function nextUri() {
   if (order.length == 0) {
-    return "spotify:track:1301WleyT98MSxVHPZCA6M";
+    return "spotify:track:0RjG5JmdOWXAR68dGlKBA5";
   }
   let currId = currentSong?.requester.id;
   if (currId == undefined || currId == "") {
