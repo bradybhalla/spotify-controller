@@ -8,3 +8,10 @@ This is an application which allows a group of people to easily play songs toget
   3) `npm run authenticate` and follow instructions
   4) `node dist/index.js`
 
+## Possible Future Changes
+- support for multiple artists
+- make ids more secure
+- clear empty users
+- drag and drop from spotify
+- shuffle individual queue button
+- link to currently playing song
