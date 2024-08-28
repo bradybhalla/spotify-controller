@@ -1,6 +1,6 @@
 # spotify-controller
 
-This is an application which allows a group of people to easily play songs together from one device.
+A web application which allows a group of people to queue songs that play on a single device. It will automatically take turns playing songs from different people and allows each individual to manage their own queue of songs.
 
 ## Setup / Usage
   1) Clone this repository
