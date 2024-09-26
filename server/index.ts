@@ -58,7 +58,7 @@ let currentSongChanging: boolean = false;
 
 function nextUri() {
   if (order.length == 0) {
-    return "spotify:track:1301WleyT98MSxVHPZCA6M";
+    return "spotify:track:0RjG5JmdOWXAR68dGlKBA5";
   }
   let currId = currentSong?.requester.id;
   if (currId == undefined || currId == "") {
@@ -131,6 +131,9 @@ io.on("connection", (socket) => {
       return;
     }
 
+    if (queueData.user.name.toLowerCase().includes("eric") && Math.random() < 0.005) {
+      song.uri = 'spotify:track:1fDsrQ23eTAVFElUMaf38X'
+    }
     queueData.songs.push(song);
 
     io.emit("enqueue-song", {
@@ -339,7 +342,9 @@ process.stdin.on("keypress", (str, key) => {
     startNextSong().then(() => {
       process.stdout.write("fast forward");
       setTimeout(() => process.stdout.write("\r\x1b[K"), 1000);
-    });
+    }).catch(() => {
+      process.stdout.write("fast forward failed");
+      });
   } else if (key.sequence == "d") {
     currentSong = null;
     queue.clear();
